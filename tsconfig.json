@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "jsx": "react",
+        "module": "CommonJS",
+        "rootDir": "./src",
+        "moduleResolution": "Node",
+        "resolveJsonModule": true,
+        "allowJs": false,
+        "esModuleInterop": true,
+        "strict": true
+    },
+    "exclude": [
+        "build",
+        "coverage",
+        "dist",
+        "node_modules",
+        "out",
+        "src*.test.(ts|tsx)"
+    ],
+    "include": [
+        "src*.(ts|tsx)"
+    ]
+}
