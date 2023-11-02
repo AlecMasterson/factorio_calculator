@@ -3,7 +3,7 @@ import {Card, CardContent} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {Handle, NodeProps, Position} from 'reactflow';
 import {NodeConstant} from '../../types/Node';
-import NodeMap from '../../types/NodeMap';
+import {NodeMap} from '../../types/NodeMap';
 import {NodeType} from "../../types/NodeType";
 
 export default function Constant(props: NodeProps): React.ReactElement {
