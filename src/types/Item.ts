@@ -9,6 +9,7 @@ export interface ItemIngredient extends Item {
 }
 
 export interface ItemProduct extends Item {
+  percent: number;
   rate: number;
   targets: string[];
 }
