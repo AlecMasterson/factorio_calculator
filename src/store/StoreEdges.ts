@@ -2,7 +2,7 @@ import {createSlice, Slice} from '@reduxjs/toolkit';
 import {cloneDeep} from 'lodash';
 
 export const SliceEdges: Slice = createSlice({
-  initialState: {},
+  initialState: [],
   name: 'edges',
   reducers: {
     addEdge: (state: string[], params: {payload: {edge: string}}): string[] => {

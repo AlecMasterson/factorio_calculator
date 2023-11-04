@@ -1,69 +1,80 @@
-import React, {useCallback} from 'react';
-import ReactFlow, {addEdge, Connection, Edge, Node as FlowNode, useNodesState, useEdgesState} from 'reactflow';
+import React from 'react';
+import ReactFlow, {Connection, Edge, Node as FlowNode} from 'reactflow';
 import 'reactflow/dist/style.css';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {Dispatch} from '@reduxjs/toolkit';
 import NodeConstant from './components/node/Constant';
 import NodeMachine from './components/node/Machine';
 import {Node} from './types/Node';
+import {NodeMap} from './types/NodeMap';
 import {NodeType} from './types/NodeType';
-import {updatePosition} from './Store';
+import {updatePosition} from './store/StoreNodes';
 
 const NodeTypes = {NodeConstant, NodeMachine};
 
-interface GraphNode {
-  attributes: Node;
-  key: string;
-}
-
-interface GraphProps {
-  nodes: GraphNode[];
-}
-
 interface FlowProps {
-  graph: GraphProps;
   onAddEdge: (connection: Connection) => boolean;
 }
 
-export default function Flow(props: FlowProps): React.ReactElement {
-  const dispatch = useDispatch();
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+function Flow(props: FlowProps): React.ReactElement {
+  const dispatch: Dispatch = useDispatch();
+  const edgeUpdateRef = React.useRef(false);
+  const edges: string[] = useSelector((state: {edges: string[]}): string[] => state.edges);
+  const nodes: NodeMap = useSelector((state: {nodes: NodeMap}): NodeMap => state.nodes);
 
-  React.useEffect(() => {
-    if (!props.graph.nodes) {
-      return;
+  const flowEdges: Edge[] = edges.map((edge: string): Edge => ({
+    id: edge,
+    source: edge.split(',')[0].split('-')[0],
+    sourceHandle: edge.split(',')[0].split('-')[1],
+    target: edge.split(',')[1].split('-')[0],
+    targetHandle: edge.split(',')[1].split('-')[1]
+  }));
+
+  const flowNodes: FlowNode[] = Object.values(nodes).map((node: Node): FlowNode => ({
+    data: {},
+    id: node.id,
+    position: node.position,
+    type: node.type === NodeType.CONSTANT ? 'NodeConstant' : 'NodeMachine'
+  }));
+
+  const onConnect = React.useCallback((connection: Connection): void => {
+    props.onAddEdge(connection)
+  }, []);
+
+  const onEdgeUpdate = React.useCallback((_1: Edge, _2: Connection): void => {
+    edgeUpdateRef.current = true;
+  }, []);
+
+  const onEdgeUpdateStart = React.useCallback((_1: React.MouseEvent, _2: Edge, _3: 'source' | 'target'): void => {
+    edgeUpdateRef.current = false;
+  }, []);
+
+  const onEdgeUpdateEnd = React.useCallback((_1: React.MouseEvent, edge: Edge, _3: 'source' | 'target'): void => {
+    if (!edgeUpdateRef.current) {
+      // TODO: Attempt to update state for removing edge.
     }
 
-    console.log('Flow Props', props);
-    setNodes(props.graph.nodes.map((node: GraphNode): FlowNode => ({
-      data: {},
-      id: node.key,
-      position: node.attributes.position,
-      type: node.attributes.type === NodeType.CONSTANT ? 'NodeConstant' : 'NodeMachine'
-    })));
-  }, [props.graph]);
+    edgeUpdateRef.current = false;
+  }, []);
 
-  const onConnect = useCallback((connection: Connection): void => {
-    if (props.onAddEdge(connection)) {
-      setEdges((tempEdges: Edge[]) => addEdge(connection, tempEdges));
-    }
-  }, [setEdges]);
-
-  const onNodeDragStop = useCallback((_: any, x: {id: string, position: {x: number, y: number}}): void => {
-    dispatch(updatePosition({nodeId: x.id, position: x.position}));
-  }, [onNodesChange]);
+  const onNodeDragStop = React.useCallback((_1: React.MouseEvent, node: FlowNode, _3: FlowNode[]): void => {
+    dispatch(updatePosition({nodeId: node.id, position: node.position}));
+  }, []);
 
   return (
     <div style={{height: '100vh', width: '100vw'}}>
       <ReactFlow
-        edges={edges}
-        nodes={nodes}
+        edges={flowEdges}
+        nodes={flowNodes}
         nodeTypes={NodeTypes}
         onConnect={onConnect}
-        onEdgesChange={onEdgesChange}
+        onEdgeUpdate={onEdgeUpdate}
+        onEdgeUpdateStart={onEdgeUpdateStart}
+        onEdgeUpdateEnd={onEdgeUpdateEnd}
         onNodeDragStop={onNodeDragStop}
-        onNodesChange={onNodesChange}
       />
     </div>
   );
 }
+
+export default React.memo(Flow);
