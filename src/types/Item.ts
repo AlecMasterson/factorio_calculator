@@ -1,5 +1,6 @@
 export interface Item {
   id: string;
+  maxRate: number;
   name: string;
   value: number;
 }
