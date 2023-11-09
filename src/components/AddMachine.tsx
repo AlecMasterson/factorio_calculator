@@ -1,9 +1,22 @@
+// @ts-ignore
 import React from 'react';
-import {Box, Button, TextField} from '@mui/material';
+import {Box, Button} from '@mui/material';
 import {NodeMachine} from '../types/Node';
+import {NodeType} from '../types/NodeType';
+import InputNumber from './inputs/Number';
+import InputText from './inputs/Text';
 
-function AddItem(props: {item: {name: string, value: string}, onChangeName: (name: string) => void, onChangeValue: (value: string) => void}): React.ReactElement {
+interface AddItemProps {
+  isProduct?: boolean;
+  item: {name: string, percent?: string, value: string};
+  onChangeName: (name: string) => void;
+  onChangePercent?: (percent: string) => void;
+  onChangeValue: (value: string) => void;
+}
+
+function AddItem(props: AddItemProps): React.ReactElement {
   const [name, setName] = React.useState<string>(props.item.name);
+  const [percent, setPercent] = React.useState<string>(props.item.percent || '');
   const [value, setValue] = React.useState<string>(props.item.value);
 
   React.useEffect((): void => {
@@ -11,47 +24,48 @@ function AddItem(props: {item: {name: string, value: string}, onChangeName: (nam
   }, [name]);
 
   React.useEffect((): void => {
+    props.onChangePercent && props.onChangePercent(percent);
+  }, [percent]);
+
+  React.useEffect((): void => {
     props.onChangeValue(value);
   }, [value]);
 
   return (
     <React.Fragment>
-      <TextField
-        error={name === ''}
-        fullWidth
+      <InputText
         label='Item Name'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => setName(event.target.value)}
-        required
+        props={{fullWidth: false}}
+        setValue={setName}
         value={name}
       />
 
-      <TextField
-        error={value === '0'}
-        fullWidth
-        label='Number Consumed'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => {
-          try {
-            if (/^\d*\.?\d+$/.test(event.target.value)) {
-              setValue(event.target.value);
-            }
-          } catch (error: unknown) {}
-        }}
-        required
+      <InputNumber
+        label={`Number ${props.isProduct ? 'Produced' : 'Consumed'}`}
+        props={{fullWidth: false}}
+        setValue={setValue}
         value={value}
       />
+
+      {props.isProduct && (
+        <InputNumber
+          label='Percent Output'
+          props={{fullWidth: false}}
+          setValue={setPercent}
+          value={percent}
+        />
+      )}
     </React.Fragment>
   );
 }
 
 export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}): React.ReactElement {
   const [count, setCount] = React.useState<string>('0');
-  const [cycle, setCycle] = React.useState<string>('0');
+  const [cycle, setCycle] = React.useState<string>('0.0');
   const [ingredients, setIngredients] = React.useState<{name: string, value: string}[]>([]);
-  const [multiplier, setMultiplier] = React.useState<string>('0');
+  const [multiplier, setMultiplier] = React.useState<string>('0.0');
   const [name, setName] = React.useState<string>('');
-  const [products, setProducts] = React.useState<{name: string, value: string}[]>([]);
+  const [products, setProducts] = React.useState<{name: string, percent: string, value: string}[]>([]);
 
   function onAdd(): void {
     const i = ingredients.reduce((x, ingredient) => ({
@@ -84,7 +98,8 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
       multiplier: parseFloat(multiplier),
       name: name,
       position: {x: 0, y: 0},
-      products: p
+      products: p,
+      type: NodeType.MACHINE
     });
   }
 
@@ -92,74 +107,21 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
     <Box
       autoComplete='off'
       component='form'
-      noValidate sx={{
+      noValidate
+      sx={{
         paddingBottom: '16px',
         paddingLeft: '16px',
         paddingRight: '16px'
       }}
     >
-      <TextField
-        error={name === ''}
-        fullWidth
-        label='Machine Name'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => setName(event.target.value)}
-        required
-        sx={{marginTop: 0}}
-        value={name}
-      />
-
-      <TextField
-        error={count === '0'}
-        fullWidth
-        label='Number of Machines'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => {
-          try {
-            if (/^\d*\.?\d+$/.test(event.target.value)) {
-              setCount(event.target.value);
-            }
-          } catch (error: unknown) {}
-        }}
-        required
-        value={count}
-      />
-
-      <TextField
-        error={cycle === '0'}
-        fullWidth
-        label='Number of Seconds per Craft'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => {
-          try {
-            if (/^\d*\.?\d+$/.test(event.target.value)) {
-              setCycle(event.target.value);
-            }
-          } catch (error: unknown) {}
-        }}
-        required
-        value={cycle}
-      />
-
-      <TextField
-        error={multiplier === '0'}
-        fullWidth
-        label='Crafter Multiplier'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => {
-          try {
-            if (/^\d*\.?\d+$/.test(event.target.value)) {
-              setMultiplier(event.target.value);
-            }
-          } catch (error: unknown) {}
-        }}
-        required
-        value={multiplier}
-      />
+      <InputText label='Machine Name' setValue={setName} value={name} />
+      <InputNumber isInteger label='Number of Machines' setValue={setCount} value={count} />
+      <InputNumber label='Number of Seconds per Craft' setValue={setCycle} value={cycle} />
+      <InputNumber label='Crafter Multiplier' setValue={setMultiplier} value={multiplier} />
 
       <Button
         fullWidth
-        onClick={() => setIngredients([...ingredients, {name: '', value: '0'}])}
+        onClick={() => setIngredients([...ingredients, {name: '', value: '0.0'}])}
         variant='outlined'
       >
         Add Ingredient
@@ -186,19 +148,26 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
 
       <Button
         fullWidth
-        onClick={() => setProducts([...products, {name: '', value: '0'}])}
+        onClick={() => setProducts([...products, {name: '', percent: '0.0', value: '0.0'}])}
         variant='outlined'
       >
         Add Product
       </Button>
 
-      {products.map((product: {name: string, value: string}, index: number): React.ReactElement => (
+      {products.map((product: {name: string, percent: string, value: string}, index: number): React.ReactElement => (
         <AddItem
+          isProduct
           item={product}
           key={index}
           onChangeName={(name: string): void => {
             const temp = [...products];
             temp[index].name = name;
+
+            setProducts(temp);
+          }}
+          onChangePercent={(percent: string): void => {
+            const temp = [...products];
+            temp[index].percent = percent;
 
             setProducts(temp);
           }}
@@ -212,7 +181,6 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
       ))}
 
       <Button
-        disabled={name === '' || count === '0' || cycle === '0' || multiplier === '0'}
         fullWidth
         onClick={onAdd}
         variant='outlined'
