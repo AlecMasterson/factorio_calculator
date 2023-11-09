@@ -1,11 +1,11 @@
 // @ts-ignore
 import React from 'react';
 import {Box, Button} from '@mui/material';
+import {ItemIngredient, ItemProduct} from '../types/Item';
 import {NodeMachine} from '../types/Node';
 import {NodeType} from '../types/NodeType';
 import InputNumber from './inputs/Number';
 import InputText from './inputs/Text';
-import {ItemIngredient, ItemProduct} from "../types/Item";
 
 interface AddItemProps {
   isProduct?: boolean;
@@ -74,7 +74,7 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
         ...x,
         [Object.keys(x).length.toString()]: {
           id: Object.keys(x).length.toString(),
-          maxRate: 0,
+          maxRate: parseFloat(ingredient.value) / parseFloat(cycle) * parseFloat(multiplier) * parseInt(count),
           name: ingredient.name,
           rate: {},
           value: parseFloat(ingredient.value)
@@ -86,7 +86,7 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
         ...x,
         [Object.keys(x).length.toString()]: {
           id: Object.keys(x).length.toString(),
-          maxRate: 0,
+          maxRate: parseFloat(product.value) / parseFloat(cycle) * parseFloat(multiplier) * parseInt(count),
           name: product.name,
           percent: parseFloat(product.percent),
           rate: 0,
