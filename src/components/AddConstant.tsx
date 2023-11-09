@@ -1,10 +1,12 @@
+// @ts-ignore
 import React from 'react';
 import {Box, Button, TextField} from '@mui/material';
 import {NodeConstant} from '../types/Node';
+import {NodeType} from '../types/NodeType';
 
 export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}): React.ReactElement {
   const [name, setName] = React.useState<string>('');
-  const [rate, setRate] = React.useState<string>('0');
+  const [rate, setRate] = React.useState<string>('0.0');
 
   function onAdd(): void {
     props.onAdd({
@@ -12,7 +14,8 @@ export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}
       name: name,
       position: {x: 0, y: 0},
       rate: parseFloat(rate),
-      targets: []
+      targets: [],
+      type: NodeType.CONSTANT
     });
   }
 
@@ -20,7 +23,8 @@ export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}
     <Box
       autoComplete='off'
       component='form'
-      noValidate sx={{
+      noValidate
+      sx={{
         paddingBottom: '16px',
         paddingLeft: '16px',
         paddingRight: '16px'
@@ -33,18 +37,18 @@ export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}
         margin='normal'
         onChange={(event: {target: {value: string}}): void => setName(event.target.value)}
         required
-        sx={{marginTop: 0}}
         value={name}
       />
 
       <TextField
-        error={rate === '0'}
+        error={rate === '0.0'}
         fullWidth
         label='Output Rate'
         margin='normal'
         onChange={(event: {target: {value: string}}): void => {
           try {
-            if (/^\d*\.?\d+$/.test(event.target.value)) {
+            // @ts-ignore
+            if (parseFloat(event.target.value) !== 0 && !Number.isNaN(parseFloat(event.target.value))) {
               setRate(event.target.value);
             }
           } catch (error: unknown) {}
@@ -54,7 +58,7 @@ export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}
       />
 
       <Button
-        disabled={name === '' || rate === '0'}
+        disabled={name === '' || rate === '0.0'}
         fullWidth
         onClick={onAdd}
         variant='outlined'
