@@ -1,11 +1,12 @@
+// @ts-ignore
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import Store from './Store';
+import {createRoot} from 'react-dom/client';
 import {Provider} from 'react-redux';
-import Main from './Main.tsx';
+import Store from './Store';
+import Main from './Main';
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById('root')).render(
   <Provider store={Store}>
     <Main />
   </Provider>
