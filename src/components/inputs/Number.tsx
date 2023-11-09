@@ -1,10 +1,11 @@
 // @ts-ignore
 import React from 'react';
-import {TextField} from '@mui/material';
+import {TextField, TextFieldProps} from '@mui/material';
 
 interface InputNumberProps {
   isInteger?: boolean;
   label: string;
+  props?: Partial<TextFieldProps>;
   setValue: (value: string) => void;
   value: string;
 }
@@ -37,6 +38,7 @@ export default function InputNumber(props: InputNumberProps): React.ReactElement
       }}
       required
       value={props.value}
+      {...props.props}
     />
   );
 }

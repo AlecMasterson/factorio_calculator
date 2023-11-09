@@ -1,9 +1,10 @@
 // @ts-ignore
 import React from 'react';
-import {TextField} from '@mui/material';
+import {TextField, TextFieldProps} from '@mui/material';
 
 interface InputTextProps {
   label: string;
+  props?: Partial<TextFieldProps>;
   setValue: (value: string) => void;
   value: string;
 }
@@ -18,6 +19,7 @@ export default function InputText(props: InputTextProps): React.ReactElement {
       onChange={(event: {target: {value: string}}): void => props.setValue(event.target.value)}
       required
       value={props.value}
+      {...props.props}
     />
   );
 }
