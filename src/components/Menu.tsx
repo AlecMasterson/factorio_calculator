@@ -18,7 +18,7 @@ import UndoIcon from '@mui/icons-material/UndoOutlined';
 import {Node} from '../types/Node';
 import {NodeMap} from '../types/NodeMap';
 import {setEdges} from '../store/StoreEdges';
-import {addNode, resetNodes, setNodes} from '../store/StoreNodes';
+import {addNode, resetConnections, setNodes} from '../store/StoreNodes';
 import AddConstant from './AddConstant';
 import AddMachine from './AddMachine';
 import Util from '../Util';
@@ -46,7 +46,7 @@ export default function Menu(): React.ReactElement {
 
   function resetEdges(): void {
     dispatch(setEdges({edges: []}));
-    dispatch(resetNodes({}));
+    dispatch(resetConnections({}));
   }
 
   function save(): void {
