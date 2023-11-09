@@ -1,8 +1,10 @@
 // @ts-ignore
 import React from 'react';
-import {Box, Button, TextField} from '@mui/material';
+import {Box, Button} from '@mui/material';
 import {NodeConstant} from '../types/Node';
 import {NodeType} from '../types/NodeType';
+import InputNumber from './inputs/Number';
+import InputText from './inputs/Text';
 
 export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}): React.ReactElement {
   const [name, setName] = React.useState<string>('');
@@ -30,30 +32,15 @@ export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}
         paddingRight: '16px'
       }}
     >
-      <TextField
-        error={name === ''}
-        fullWidth
+      <InputText
         label='Item Name'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => setName(event.target.value)}
-        required
+        setValue={setName}
         value={name}
       />
 
-      <TextField
-        error={rate === '0.0'}
-        fullWidth
+      <InputNumber
         label='Output Rate'
-        margin='normal'
-        onChange={(event: {target: {value: string}}): void => {
-          try {
-            // @ts-ignore
-            if (parseFloat(event.target.value) !== 0 && !Number.isNaN(parseFloat(event.target.value))) {
-              setRate(event.target.value);
-            }
-          } catch (error: unknown) {}
-        }}
-        required
+        setValue={setRate}
         value={rate}
       />
 
