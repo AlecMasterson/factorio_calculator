@@ -5,6 +5,7 @@ import {NodeMachine} from '../types/Node';
 import {NodeType} from '../types/NodeType';
 import InputNumber from './inputs/Number';
 import InputText from './inputs/Text';
+import {ItemIngredient, ItemProduct} from "../types/Item";
 
 interface AddItemProps {
   isProduct?: boolean;
@@ -68,26 +69,31 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
   const [products, setProducts] = React.useState<{name: string, percent: string, value: string}[]>([]);
 
   function onAdd(): void {
-    const i = ingredients.reduce((x, ingredient) => ({
-      ...x,
-      [Object.keys(x).length.toString()]: {
-        id: Object.keys(x).length.toString(),
-        name: ingredient.name,
-        rate: {},
-        value: parseInt(ingredient.value)
-      }
-    }), {});
+    const i: {[id: string]: ItemIngredient} =
+      ingredients.reduce((x: {[id: string]: ItemIngredient}, ingredient: {name: string, value: string}) => ({
+        ...x,
+        [Object.keys(x).length.toString()]: {
+          id: Object.keys(x).length.toString(),
+          maxRate: 0,
+          name: ingredient.name,
+          rate: {},
+          value: parseFloat(ingredient.value)
+        }
+      }), {});
 
-    const p = products.reduce((x, product) => ({
-      ...x,
-      [Object.keys(x).length.toString()]: {
-        id: Object.keys(x).length.toString(),
-        name: product.name,
-        rate: 0,
-        targets: [],
-        value: parseInt(product.value)
-      }
-    }), {});
+    const p: {[id: string]: ItemProduct} =
+      products.reduce((x: {[id: string]: ItemProduct}, product: {name: string, percent: string, value: string}) => ({
+        ...x,
+        [Object.keys(x).length.toString()]: {
+          id: Object.keys(x).length.toString(),
+          maxRate: 0,
+          name: product.name,
+          percent: parseFloat(product.percent),
+          rate: 0,
+          targets: [],
+          value: parseFloat(product.value)
+        }
+      }), {});
 
     props.onAdd({
       count: parseInt(count),
