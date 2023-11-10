@@ -1,8 +1,9 @@
+// @ts-ignore
 import React from 'react';
-import ReactFlow, {Connection, Edge, Node as FlowNode} from 'reactflow';
-import 'reactflow/dist/style.css';
 import {useDispatch, useSelector} from 'react-redux';
 import {Dispatch} from '@reduxjs/toolkit';
+import ReactFlow, {Connection, Edge, Node as FlowNode} from 'reactflow';
+import 'reactflow/dist/style.css';
 import NodeConstant from './components/node/Constant';
 import NodeMachine from './components/node/Machine';
 import {Node} from './types/Node';
@@ -14,6 +15,7 @@ const NodeTypes = {NodeConstant, NodeMachine};
 
 interface FlowProps {
   onAddEdge: (connection: Connection) => boolean;
+  onRemoveEdge: (keyId: string) => void;
 }
 
 function Flow(props: FlowProps): React.ReactElement {
@@ -30,6 +32,7 @@ function Flow(props: FlowProps): React.ReactElement {
     targetHandle: edge.split(',')[1].split('-')[1]
   }));
 
+  // @ts-ignore
   const flowNodes: FlowNode[] = Object.values(nodes).map((node: Node): FlowNode => ({
     data: {},
     id: node.id,
@@ -51,7 +54,7 @@ function Flow(props: FlowProps): React.ReactElement {
 
   const onEdgeUpdateEnd = React.useCallback((_1: React.MouseEvent, edge: Edge, _3: 'source' | 'target'): void => {
     if (!edgeUpdateRef.current) {
-      // TODO: Attempt to update state for removing edge.
+      props.onRemoveEdge(edge.id);
     }
 
     edgeUpdateRef.current = false;

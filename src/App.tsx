@@ -6,7 +6,7 @@ import {Dispatch} from '@reduxjs/toolkit';
 import {Connection} from 'reactflow';
 import {Node, NodeConstant, NodeMachine} from './types/Node';
 import {NodeMap} from './types/NodeMap';
-import {addEdge} from './store/StoreEdges';
+import {addEdge, removeEdge} from './store/StoreEdges';
 import Flow from './Flow';
 import Util from './Util';
 
@@ -18,16 +18,28 @@ function App(): React.ReactElement {
   const nodes: NodeMap = useSelector((state: {nodes: NodeMap}): NodeMap => state.nodes);
 
   React.useEffect(() => {
-    graph.clear();
 
     // @ts-ignore
     Object.values(nodes).forEach((node: Node): void => {
-      graph.addNode(node.id, {...node});
+      if (!graph.hasNode(node.id)) {
+        graph.addNode(node.id, {...node});
+      }
     });
-  }, [ nodes]);
+
+    edges.forEach((edge: string): void => {
+      const source: string = edge.split(',')[0].split('-')[0];
+      const target: string = edge.split(',')[1].split('-')[0];
+
+      if (!graph.hasEdge(edge)) {
+        graph.addEdgeWithKey(edge, source, target);
+      }
+    });
+  }, [edges, nodes]);
 
   React.useEffect(() => {
     graph.on('edgeAdded', (params: {key: string}): void => Util.graphEdgeAdded(dispatch, graph, params));
+
+    graph.on('edgeDropped', (params: {key: string}): void => Util.graphEdgeDropped(dispatch, graph, params));
 
     graph.on('nodeAttributesUpdated', (params: any): void => {
       if (params.name === 'ingredients') {
@@ -63,9 +75,15 @@ function App(): React.ReactElement {
     }
   }, []);
 
+  const graphRemoveEdge: (keyId: string) => void = React.useCallback((keyId: string): void => {
+    graph.dropEdge(keyId);
+    dispatch(removeEdge({edge: keyId}));
+  });
+
   return (
     <Flow
       onAddEdge={graphAddEdge}
+      onRemoveEdge={graphRemoveEdge}
     />
   );
 }

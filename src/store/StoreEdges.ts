@@ -11,10 +11,15 @@ export const SliceEdges: Slice = createSlice({
 
       return edges;
     },
+    removeEdge: (state: string[], params: {payload: {edge: string}}): string[] => {
+      const edges: string[] = cloneDeep(state);
+
+      return edges.filter((edge: string): boolean => edge !== params.payload.edge);
+    },
     setEdges: (_: string[], params: {payload: {edges: string[]}}): string[] => {
       return params.payload.edges;
     }
   }
 });
 
-export const {addEdge, setEdges} = SliceEdges.actions;
+export const {addEdge, removeEdge, setEdges} = SliceEdges.actions;
