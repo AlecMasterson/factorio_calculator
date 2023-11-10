@@ -27,7 +27,7 @@ function CustomHandle(props: CustomHandleProps): React.ReactElement {
   }
 
   let className: string = `custom-handle ${props.position === Position.Left ? 'position-left' : 'position-right'}`;
-  if (rate === props.item.maxRate) {
+  if (Math.abs(rate - props.item.maxRate) <= 0.0000001) {
     className += ' satisfied';
   } else if (rate > props.item.maxRate) {
     className += ' overflow';
