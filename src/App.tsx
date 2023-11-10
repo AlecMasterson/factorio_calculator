@@ -26,6 +26,12 @@ function App(): React.ReactElement {
       }
     });
 
+    graph.nodes().forEach((nodeId: string): void => {
+      if (!(nodeId in nodes)) {
+        graph.dropNode(nodeId);
+      }
+    });
+
     edges.forEach((edge: string): void => {
       const source: string = edge.split(',')[0].split('-')[0];
       const target: string = edge.split(',')[1].split('-')[0];

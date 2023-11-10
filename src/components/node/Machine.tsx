@@ -1,13 +1,15 @@
 // @ts-ignore
 import React from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {Dispatch} from '@reduxjs/toolkit';
 import {Handle, NodeProps, Position} from 'reactflow';
-import {Card, CardContent} from '@mui/material';
+import {Button, Card, CardContent} from '@mui/material';
 import {sum} from 'lodash';
 import {Item, ItemIngredient, ItemProduct} from '../../types/Item';
 import {NodeMachine} from '../../types/Node';
 import {NodeMap} from '../../types/NodeMap';
 import {NodeType} from '../../types/NodeType';
+import {removeNode} from '../../store/StoreNodes';
 
 const ConnectionHeight = 64;
 
@@ -53,6 +55,7 @@ function CustomHandle(props: CustomHandleProps): React.ReactElement {
 }
 
 export default function Machine(props: NodeProps): React.ReactElement {
+  const dispatch: Dispatch = useDispatch();
   const nodes: NodeMap = useSelector((state: {nodes: NodeMap}): NodeMap => state.nodes);
 
   if (!(props.id in nodes)) {
@@ -68,9 +71,29 @@ export default function Machine(props: NodeProps): React.ReactElement {
   // @ts-ignore
   const products: ItemProduct[] = Object.values(node.products);
 
+  function canDelete(): boolean {
+    const noInputs: boolean =
+      ingredients.every((ingredient: ItemIngredient): boolean => Object.keys(ingredient.rate).length === 0);
+    const noOutputs: boolean =
+      products.every((product: ItemProduct): boolean => product.targets.length === 0);
+
+    return noInputs && noOutputs;
+  }
+
   return (
     <Card variant='outlined'>
       <CardContent>
+        <Button
+          color='error'
+          disabled={!canDelete()}
+          onClick={() => dispatch(removeNode({nodeId: props.id}))}
+          size='small'
+          sx={{float: 'right'}}
+          variant='outlined'
+        >
+          Delete
+        </Button>
+
         <div style={{display: 'flex', flexDirection: 'column'}}>
           <span>{node.name}</span>
           <span>Number of Machines: {node.count}</span>
