@@ -17,7 +17,7 @@ export interface NodeMachine extends Node {
   count: number;
   cycle: number;
   ingredients: {[id: string]: ItemIngredient};
-  modules: {[type: string]: number};
+  modules: {prod: number, speed: number};
   multiplier: number;
   products: {[id: string]: ItemProduct};
 }
