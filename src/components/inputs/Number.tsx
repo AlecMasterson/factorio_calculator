@@ -3,6 +3,7 @@ import React from 'react';
 import {TextField, TextFieldProps} from '@mui/material';
 
 interface InputNumberProps {
+  canBeZero?: boolean;
   isInteger?: boolean;
   label: string;
   props?: Partial<TextFieldProps>;
@@ -11,6 +12,10 @@ interface InputNumberProps {
 }
 
 function isError(props: InputNumberProps): boolean {
+  if (props.canBeZero) {
+    return false;
+  }
+
   if (props.isInteger) {
     return parseInt(props.value) === 0;
   }
