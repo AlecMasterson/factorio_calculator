@@ -9,3 +9,44 @@ html, body, #root {
 #root > .MuiBox-root {
     flex-grow: 1;
 }
+
+.react-flow .react-flow__handle {
+    width: 16px;
+    height: 24px;
+    border-radius: 4px;
+    background-color: #784be8;
+}
+
+.MuiPaper-rounded {
+    border-radius: 8px !important;
+}
+
+.custom-handle {
+    border: 1px solid black;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    max-width: 200px;
+    margin: 8px;
+    padding: 8px;
+}
+
+.custom-handle.position-left {
+    margin-left: 0 !important;
+}
+.custom-handle.position-right {
+    margin-right: 0 !important;
+}
+
+.satisfied {
+    background-color: #52AB3F !important;
+    border-color: #A1D99B !important;
+}
+.overflow {
+    background-color: #BA802D !important;
+    border-color: #FFB347 !important;
+}
+.starved {
+    background-color: #BD4B5F !important;
+    border-color: #FFC0CB !important;
+}
