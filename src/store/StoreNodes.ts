@@ -22,7 +22,7 @@ export const SliceNodes: Slice = createSlice({
 
       return nodes;
     },
-    resetNodes: (state: NodeMap): NodeMap => {
+    resetConnections: (state: NodeMap): NodeMap => {
       const nodes: NodeMap = cloneDeep(state);
 
       Object.keys(nodes).forEach((nodeId: string): void => {
@@ -100,7 +100,7 @@ export const SliceNodes: Slice = createSlice({
 export const {
   addNode,
   removeNode,
-  resetNodes,
+  resetConnections,
   setNodes,
   updateIngredients,
   updatePosition,
