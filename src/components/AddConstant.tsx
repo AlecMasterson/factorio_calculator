@@ -39,7 +39,7 @@ export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}
       />
 
       <InputNumber
-        label='Output Rate'
+        label='Rate'
         setValue={setRate}
         value={rate}
       />
