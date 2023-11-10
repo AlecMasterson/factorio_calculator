@@ -45,7 +45,7 @@ export default function AddConstant(props: {onAdd: (node: NodeConstant) => void}
       />
 
       <Button
-        disabled={name === '' || rate === '0.0'}
+        disabled={name === '' || parseFloat(rate) === 0}
         fullWidth
         onClick={onAdd}
         variant='outlined'

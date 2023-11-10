@@ -1,6 +1,6 @@
 // @ts-ignore
 import React from 'react';
-import {Box, Button} from '@mui/material';
+import {Box, Button, Stack} from '@mui/material';
 import {ItemIngredient, ItemProduct} from '../types/Item';
 import {NodeMachine} from '../types/Node';
 import {NodeType} from '../types/NodeType';
@@ -17,7 +17,7 @@ interface AddItemProps {
 
 function AddItem(props: AddItemProps): React.ReactElement {
   const [name, setName] = React.useState<string>(props.item.name);
-  const [percent, setPercent] = React.useState<string>(props.item.percent || '');
+  const [percent, setPercent] = React.useState<string>(props.item.percent || '1.0');
   const [value, setValue] = React.useState<string>(props.item.value);
 
   React.useEffect((): void => {
@@ -33,7 +33,7 @@ function AddItem(props: AddItemProps): React.ReactElement {
   }, [value]);
 
   return (
-    <React.Fragment>
+    <Stack direction='row' spacing={2} sx={{marginBottom: '8px', marginTop: '16px'}}>
       <InputText
         label='Item Name'
         props={{fullWidth: false}}
@@ -56,7 +56,7 @@ function AddItem(props: AddItemProps): React.ReactElement {
           value={percent}
         />
       )}
-    </React.Fragment>
+    </Stack>
   );
 }
 
@@ -64,17 +64,22 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
   const [count, setCount] = React.useState<string>('0');
   const [cycle, setCycle] = React.useState<string>('0.0');
   const [ingredients, setIngredients] = React.useState<{name: string, value: string}[]>([]);
-  const [multiplier, setMultiplier] = React.useState<string>('0.0');
+  const [moduleProd, setModuleProd] = React.useState<string>('0.0');
+  const [moduleSpeed, setModuleSpeed] = React.useState<string>('0.0');
+  const [multiplier, setMultiplier] = React.useState<string>('1.0');
   const [name, setName] = React.useState<string>('');
   const [products, setProducts] = React.useState<{name: string, percent: string, value: string}[]>([]);
 
   function onAdd(): void {
+    const moduleEffectSpeed: number = 1 + parseFloat(moduleSpeed);
+    const moduleEffectProd: number = 1 + parseFloat(moduleProd);
+
     const i: {[id: string]: ItemIngredient} =
-      ingredients.reduce((x: {[id: string]: ItemIngredient}, ingredient: {name: string, value: string}) => ({
+      ingredients.reduce((x: {[id: string]: ItemIngredient}, ingredient: {name: string, value: string}): {[id: string]: ItemIngredient} => ({
         ...x,
         [Object.keys(x).length.toString()]: {
           id: Object.keys(x).length.toString(),
-          maxRate: parseFloat(ingredient.value) / parseFloat(cycle) * parseFloat(multiplier) * parseInt(count),
+          maxRate: parseFloat(ingredient.value) / parseFloat(cycle) * parseFloat(multiplier) * moduleEffectSpeed * parseInt(count),
           name: ingredient.name,
           rate: {},
           value: parseFloat(ingredient.value)
@@ -82,11 +87,11 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
       }), {});
 
     const p: {[id: string]: ItemProduct} =
-      products.reduce((x: {[id: string]: ItemProduct}, product: {name: string, percent: string, value: string}) => ({
+      products.reduce((x: {[id: string]: ItemProduct}, product: {name: string, percent: string, value: string}): {[id: string]: ItemProduct} => ({
         ...x,
         [Object.keys(x).length.toString()]: {
           id: Object.keys(x).length.toString(),
-          maxRate: parseFloat(product.value) / parseFloat(cycle) * parseFloat(multiplier) * parseInt(count),
+          maxRate: parseFloat(product.value) / parseFloat(cycle) * parseFloat(multiplier) * moduleEffectSpeed * moduleEffectProd * parseInt(count),
           name: product.name,
           percent: parseFloat(product.percent),
           rate: 0,
@@ -100,13 +105,33 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
       cycle: parseFloat(cycle),
       id: '',
       ingredients: i,
-      modules: {},
+      modules: {prod: parseFloat(moduleProd), speed: parseFloat(moduleSpeed)},
       multiplier: parseFloat(multiplier),
       name: name,
       position: {x: 0, y: 0},
       products: p,
       type: NodeType.MACHINE
     });
+  }
+
+  function isDisabled(): boolean {
+    return (
+      parseInt(count) === 0 ||
+      parseFloat(cycle) === 0 ||
+      ingredients.length === 0 ||
+      ingredients.some((ingredient: {name: string, value: string}): boolean => (
+        ingredient.name === '' ||
+        parseFloat(ingredient.value) === 0
+      )) ||
+      parseFloat(multiplier) === 0 ||
+      name === '' ||
+      products.length === 0 ||
+      products.some((product: {name: string, percent: string, value: string}): boolean => (
+        product.name === '' ||
+        parseFloat(product.percent) === 0 ||
+        parseFloat(product.value) === 0
+      ))
+    );
   }
 
   return (
@@ -123,11 +148,14 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
       <InputText label='Machine Name' setValue={setName} value={name} />
       <InputNumber isInteger label='Number of Machines' setValue={setCount} value={count} />
       <InputNumber label='Number of Seconds per Craft' setValue={setCycle} value={cycle} />
-      <InputNumber label='Crafter Multiplier' setValue={setMultiplier} value={multiplier} />
+      <InputNumber label='Base Craft Multiplier' setValue={setMultiplier} value={multiplier} />
+      <InputNumber canBeZero label='Productivity Bonus' setValue={setModuleProd} value={moduleProd} />
+      <InputNumber canBeZero label='Speed Bonus' setValue={setModuleSpeed} value={moduleSpeed} />
 
       <Button
         fullWidth
         onClick={() => setIngredients([...ingredients, {name: '', value: '0.0'}])}
+        sx={{marginTop: '16px'}}
         variant='outlined'
       >
         Add Ingredient
@@ -154,7 +182,8 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
 
       <Button
         fullWidth
-        onClick={() => setProducts([...products, {name: '', percent: '0.0', value: '0.0'}])}
+        onClick={() => setProducts([...products, {name: '', percent: '1.0', value: '0.0'}])}
+        sx={{marginTop: '16px'}}
         variant='outlined'
       >
         Add Product
@@ -187,8 +216,10 @@ export default function AddMachine(props: {onAdd: (node: NodeMachine) => void}):
       ))}
 
       <Button
+        disabled={isDisabled()}
         fullWidth
         onClick={onAdd}
+        sx={{marginTop: '16px'}}
         variant='outlined'
       >
         Add
